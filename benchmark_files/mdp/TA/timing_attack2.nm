@@ -1,55 +1,41 @@
 mdp
 
-const int n = 1;
+const int n = 1; // bits for the encryption key
 
-module secret_thread1
+module timing_attack
 
-	    h1  : [0..n]; 
-        pc1 : [0..1];
-        c1  : [0..2*n];
-        e1  : [0..1];
-        a1  : [0..1];
+        h  : [0..n]; // number of bits of the encryption key
+        pc : [0..2];
+        c  : [0..2*n]; //counter of the attacker
+        e  : [0..1]; // termination of the program
+        a  : [0..1]; // scheduler quantifier
 
-        []  (h1>0)&(pc1=0)&(c1<2*n)&(a1=0)        -> 1/2 : (h1'=h1-1)&(pc1'=1)  + 1/2 : (c1'=c1+1); //b(i) is true
-        []  (h1>0)&(pc1=0)&(c1<2*n)&(a1=0)        -> 1/2 : (h1'=h1-1)&(pc1'=0)  + 1/2 : (c1'=c1+1); //b(i) is false
-        []  (pc1=1)&(c1<2*n)&(a1=0)               -> 1/2 : (pc1'=0)           + 1/2 : (c1'=c1+1);
-        []  (h1=0)&(pc1=0)&(c1<2*n)&(e1=0)&(a1=0) -> 1/2 : (e1' =1)           + 1/2 : (c1'=c1+1);
+        []  (h>0)&(pc=0)&(c<2*n)        -> 1/2 : (pc'=1) + 1/2 : (c'=c+1);
 
-        []  (h1>0)&(pc1=0)&(c1=2*n)&(a1=0)        -> (h1'=h1-1)&(pc1'=1); 
-        []  (h1>0)&(pc1=0)&(c1=2*n)&(a1=0)        -> (h1'=h1-1)&(pc1'=0); 
-        []  (pc1=1)&(c1=2*n)&(a1=0)               -> (pc1'=0);          
-        []  (h1=0)&(pc1=0)&(c1=2*n)&(e1=0)&(a1=0) -> (e1' =1);
-        []  (e1=1)&(a1=0)                         -> true;
+        // evaluate the if-condition
+        [a]  (pc=1)&(c<2*n)  -> (h'=h-1)&(pc'=2);  // b(h-1) is true
+        [b]  (pc=1)&(c<2*n)  -> (h'=h-1)&(pc'=0);  // b(h-1) is false
 
+        // if-body: "waste" one clock cycle
+        []  (pc=2)&(c<2*n)   -> 1/2 : (pc'=0) + 1/2 : (c'=c+1);
 
-        []  (h1>0)&(pc1=0)&(c1<2*n)&(a1=1)        -> 1/2 : (h1'=h1-1)&(pc1'=1)  + 1/2 : (c1'=c1+1); //b(i) is true
-        []  (h1>0)&(pc1=0)&(c1<2*n)&(a1=1)        -> 1/2 : (h1'=h1-1)&(pc1'=0)  + 1/2 : (c1'=c1+1); //b(i) is false
-        []  (pc1=1)&(c1<2*n)&(a1=1)               -> 1/2 : (pc1'=0)             + 1/2 : (c1'=c1+1);
-        []  (h1=0)&(pc1=0)&(c1<2*n)&(e1=0)&(a1=1) -> 1/2 : (e1' =1)             + 1/2 : (c1'=c1+1);
+        // the counter has reached the max value
+        [c] (h>0)&(pc=0)&(c=2*n) -> (h'=h-1)&(pc'=2);  //b(h-1) is true
+        [d] (h>0)&(pc=0)&(c=2*n) -> (h'=h-1);          //b(h-1) is false
+        []  (pc=2)&(c=2*n)       -> (pc'=0);
 
-        []  (h1>0)&(pc1=0)&(c1=2*n)&(a1=1)        -> (h1'=h1-1)&(pc1'=1); 
-        []  (h1>0)&(pc1=0)&(c1=2*n)&(a1=1)        -> (h1'=h1-1)&(pc1'=0); 
-        []  (pc1=1)&(c1=2*n)&(a1=1)               -> (pc1'=0);          
-        []  (h1=0)&(pc1=0)&(c1=2*n)&(e1=0)&(a1=1) -> (e1' =1);
-        []  (e1=1)&(a1=1)                         -> true;
-
+        // termination
+        []  (h=0)&(pc=0)&(c<2*n)&(e=0) -> 1/2 : (e' =1) + 1/2 : (c'=c+1);
+        []  (h=0)&(pc=0)&(c=2*n)&(e=0) -> (e' =1);
+        []  (e=1)                      -> true;
 
 endmodule
 
-//module secret_thread2 = secret_thread1 [h1=h2, pc1=pc2, c1=c2, e1=e2 ] endmodule
+init  (h=n)&(pc=0)&(c=0)&(e=0)  endinit
 
-init  (e1=0)&(h1=n)&(pc1=0)&(c1=0)  endinit
+label "start0" = (e=0)&(h=n)&(pc=0)&(c=0)&(a=0);
+label "start1" = (e=0)&(h=n)&(pc=0)&(c=0)&(a=1);
 
-label "start0" = (e1=0)&(h1=n)&(pc1=0)&(c1=0)&(a1=0);
-label "start1" = (e1=0)&(h1=n)&(pc1=0)&(c1=0)&(a1=1);
-
-label "counter0" = (c1=0)&(e1=1);
-label "counter1" = (c1=1)&(e1=1);
-label "counter2" = (c1=2)&(e1=1);
-label "counter3" = (c1=3)&(e1=1);
-label "counter4" = (c1=4)&(e1=1);
-label "counter5" = (c1=5)&(e1=1);
-label "counter6" = (c1=6)&(e1=1);
-label "counter7" = (c1=7)&(e1=1);
-label "counter8" = (c1=8)&(e1=1);
-
+label "counter0" = (c=0)&(e=1);
+label "counter1" = (c=1)&(e=1);
+label "counter2" = (c=2)&(e=1);
