@@ -41,9 +41,9 @@ class ModelChecker:
             semanticEncoder.encodeSemantics(non_quantified_property)
             common.colourinfo("Encoded non-quantified formula...", False)
             smt_end_time = time.perf_counter() - start_time
-            print(f"Encoding time: {smt_end_time}")
-            common.colourinfo("Number of variables: " + str(len(self.dictOfInts.keys()) + len(self.dictOfReals.keys()) + len(self.dictOfBools.keys())), False)
-            common.colourinfo("Number of formula checked: " + str(self.no_of_subformula), False)
+            print(f"Encoding time: {smt_end_time}", flush=True)
+            print("Number of variables: " + str(len(self.dictOfInts.keys()) + len(self.dictOfReals.keys()) + len(self.dictOfBools.keys())), flush=True)
+            print("Number of formula checked: " + str(self.no_of_subformula), flush=True)
             self.printResult(smt_end_time, 'exists')
 
         elif self.initial_hyperproperty.parsed_property.data == 'forall_scheduler':
@@ -57,9 +57,9 @@ class ModelChecker:
             semanticEncoder.encodeSemantics(negated_non_quantified_property)
             common.colourinfo("Encoded non-quantified formula...", False)
             smt_end_time = time.perf_counter() - start_time
-            print(f"Encoding time: {smt_end_time}")
-            common.colourinfo("Number of variables: " + str(len(self.dictOfInts.keys()) + len(self.dictOfReals.keys()) + len(self.dictOfBools.keys())), False)
-            common.colourinfo("Number of formula checked: " + str(self.no_of_subformula), False)
+            print(f"Encoding time: {smt_end_time}", flush=True)
+            print("Number of variables: " + str(len(self.dictOfInts.keys()) + len(self.dictOfReals.keys()) + len(self.dictOfBools.keys())), flush=True)
+            print("Number of formula checked: " + str(self.no_of_subformula), flush=True)
             self.printResult(smt_end_time, 'forall')
 
     def encodeActions(self):
